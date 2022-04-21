@@ -201,10 +201,10 @@ The Test Patterns given in this assignment will allow you to observe some of the
 of behaviour that the QR World can display.
 
 Test Patterns 1 and 2 start with small images of the numbers _1100_ and _1130_
-respectively. Test Pattern 1 will get into a loop from steps 4 and 5 on (in other words,
-the automaton after steps 6,8,10,... are identical to the automaton after step 4, and the
-automaton after steps 7,9,11,... are identical to the automaton after step 5).
-Test Pattern 2 reaches a fixed point after step 6 (i.e. all later steps do not change the automaton).
+respectively. Test Pattern 1 will get into a loop from steps 8 and 9 on (in other words,
+the automaton after steps 10,12,14,... are identical to the automaton after step 8, and the
+automaton after steps 11,13,15,... are identical to the automaton after step 9).
+Test Pattern 2 reaches a similar loop from steps 11 and 12 on.
 
 Test Pattern 3 provides a more complex and pretty display of a collapsing spiral.
 
