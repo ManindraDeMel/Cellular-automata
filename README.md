@@ -204,7 +204,7 @@ Test Patterns 1 and 2 start with small images of the numbers _1100_ and _1130_
 respectively. Test Pattern 1 will get into a loop from steps 8 and 9 on (in other words,
 the automaton after steps 10,12,14,... are identical to the automaton after step 8, and the
 automaton after steps 11,13,15,... are identical to the automaton after step 9).
-Test Pattern 2 reaches a similar loop from steps 11 and 12 on.
+Test Pattern 2 reaches a steady state from step 19, so the automaton after that step remains unchanged.
 
 Test Pattern 3 provides a more complex and pretty display of a collapsing spiral.
 
