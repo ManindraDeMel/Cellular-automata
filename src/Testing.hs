@@ -1,6 +1,6 @@
 module Testing where
 
-import CodeWorld
+--import CodeWorld
 import Data.Maybe (mapMaybe)
 import System.Exit
 

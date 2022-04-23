@@ -1,6 +1,6 @@
 module AutomataTest where
 
-import Automata
+--import Automata
 import Testing
 
 -- | The list of tests to run. When you define additional test cases,
