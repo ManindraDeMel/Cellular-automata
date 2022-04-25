@@ -22,8 +22,8 @@ cycleQR Alive = Dead
 cycleQR Dead = Alive
 
 renderQR :: QRCell -> Picture
-renderQR Alive = rectangle 1 1
-renderQR Dead = coloured blue $ solidRectangle 1 1
+renderQR Alive = coloured blue $ solidRectangle 1 1
+renderQR Dead = rectangle 1 1
 
 -- Helper functions for nextGenQR
 
@@ -56,10 +56,10 @@ getNeighboursCoords (Grid a b _) (x, y)
             yBound = b - 1
 
 nextGenQR :: Grid QRCell -> Grid QRCell
-nextGenQR (Grid a b c) = Grid a b newC
-    where
-        neighbourPoints = [map (getForNextGen (Grid a b c)) points | points <- map (getNeighboursCoords (Grid a b c)) (allCoords a b)]
-        newC = zipWith (curry nextState) (map (getForNextGen (Grid a b c)) (allCoords a b)) neighbourPoints
+nextGenQR (Grid a b c) = Grid a b newC                                                                  --   top left       top right     bottom left      bottom right
+    where   -- here we have a map from all the points and its associated neighbour points in a list i.e. [(Alive, Dead), (Alive, Alive), (Alive, Alive), (Dead, Alive)] for a (Grid 2 2 [Alive, Alive, Dead, Alive])
+        neighbourPointsList = [map (getForNextGen (Grid a b c)) points | points <- map (getNeighboursCoords (Grid a b c)) (allCoords a b)] 
+        newC = zipWith (curry nextState) (map (getForNextGen (Grid a b c)) (allCoords a b)) neighbourPointsList -- Then  get the associated maps (i.e. Alive : [(Alive, Dead)]) and get the next state of each individual gridpoint 
         
 
 evolveQR :: Int -> Grid QRCell -> Grid QRCell
@@ -73,3 +73,4 @@ get (Grid a b c) (x, y)
 
 allCoords :: Int -> Int -> [GridCoord]
 allCoords a b = [(x, y) | y <- [0..b-1], x <- [0..a-1]]
+
