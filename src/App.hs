@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module App where
-
+import Extension
 import Automata
 import CodeWorld
 import Data.List (splitAt)
 import Data.Text (pack)
 import GridRenderer
 import TestPatterns
+import GridRenderer (renderGrid)
 
 appMain :: IO ()
 appMain = activityOf (Model 0 1 (QR pattern1100)) handleEvent render
@@ -22,6 +23,7 @@ initial = Model 0 1
 
 data CellGrid
   = QR (Grid QRCell)
+  | Battle (Grid BattleCell)
 
 -- | Events we'd like our program to handle. Returned by 'parseEvent'.
 data AppEvent
@@ -32,11 +34,14 @@ data AppEvent
     -- ^ Replace the grid with one of the test patterns.
   | ToQR
     -- ^ Switch to QR World.
+  | ToBattle
+    -- ^ Switch to Battle World
   | Step
     -- ^ Run the automaton one step.
   | Jump
     -- ^ Jump forward a few steps.
   | IncreaseJumpSize
+
   | DecreaseJumpSize
 
 data TestPattern = One | Two | Three
@@ -58,6 +63,7 @@ parseEvent (Model _ _ grid) ev = case ev of
     | k == "2" -> Just (LoadTestPattern Two)
     | k == "3" -> Just (LoadTestPattern Three)
     | k == "Q" -> Just ToQR
+    | k == "B" -> Just ToBattle
     | k == "." -> Just Step
     | k == " " -> Just Jump
     | k == "=" -> Just IncreaseJumpSize
@@ -71,10 +77,12 @@ parseEvent (Model _ _ grid) ev = case ev of
   where
     getGridCoord p = case grid of
       QR g -> fromPoint g p
+      Battle g -> fromPoint g p
 
 applyEvent :: AppEvent -> Model -> Model
 applyEvent ev (Model n steps grid) = case ev of
   ToQR -> initial (QR pattern1100)
+  ToBattle -> initial (Battle simpleBattle)
   ChangeCell p -> Model n steps grid'
     where
       grid' = case grid of
@@ -102,6 +110,7 @@ render (Model n steps grid)
   & translated (-10) 8 (lettering (pack ("Step size: " ++ show steps)))
   & case grid of
       QR g -> renderGrid renderQR g
+      Battle g -> renderGrid renderBattleCell g
 
 -- | Apply a function to a certain cell inside a grid, and return a
 -- new grid where that cell has been replaced with the result of the
