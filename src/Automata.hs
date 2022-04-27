@@ -12,10 +12,11 @@ data Grid c = Grid Int Int [c]
 -- other pair of integers.
 type GridCoord = (Int, Int)
 
-
 -- | Type of cells used in QR World.
 data QRCell = Alive | Dead
     deriving (Eq, Show)
+
+
 
 cycleQR :: QRCell -> QRCell
 cycleQR Alive = Dead
@@ -60,11 +61,9 @@ nextGenQR (Grid a b c) = Grid a b newC                                          
     where   -- here we have a map from all the points and its associated neighbour points in a list i.e. [(Alive, Dead), (Alive, Alive), (Alive, Alive), (Dead, Alive)] for a (Grid 2 2 [Alive, Alive, Dead, Alive])
         neighbourPointsList = [map (getForNextGen (Grid a b c)) points | points <- map (getNeighboursCoords (Grid a b c)) (allCoords a b)] 
         newC = zipWith (curry nextState) (map (getForNextGen (Grid a b c)) (allCoords a b)) neighbourPointsList -- Then  get the associated maps (i.e. Alive : [(Alive, Dead)]) and get the next state of each individual gridpoint 
-        
 
 evolveQR :: Int -> Grid QRCell -> Grid QRCell
 evolveQR n g = iterate nextGenQR g !! n
-
 
 get :: Grid c -> GridCoord -> Maybe c
 get (Grid a b c) (x, y)

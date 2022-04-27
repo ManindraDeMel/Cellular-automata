@@ -57,6 +57,6 @@ parseGrid f w h cells
   | otherwise = error "parseGrid: dimensions don't match"
 
 toQR :: Char -> QRCell
-toQR 'A' = Alive 
+toQR 'A' = Alive
 toQR ' ' = Dead
 toQR _ = error"Not valid QR"
