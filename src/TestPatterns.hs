@@ -61,9 +61,35 @@ parseGrid f w h cells
 simpleBattle :: Grid BattleCell
 simpleBattle = parseGrid toBattleCell 11 3 cells where
   cells = concat
-    [ "1 1 BBB 1  "
-    , "1 B   B    "
-    , "  2 B 2 2 2"
+    [ "1 1     1  "
+    , "1          "
+    , "  2   2 2 2"
+    ]
+
+bigBattle :: Grid BattleCell
+bigBattle = parseGrid toBattleCell 34 21 cells where
+  cells = concat
+    [ "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
+    , "                1                2"
     ]
 
 toQR :: Char -> QRCell
@@ -73,7 +99,6 @@ toQR _ = error"Not valid QR"
 
 toBattleCell :: Char -> BattleCell
 toBattleCell ' ' = Ground
-toBattleCell 'B' = Bush
-toBattleCell '1' = Team1 False
-toBattleCell '2' = Team2 False
+toBattleCell '1' = Team1
+toBattleCell '2' = Team2 
 toBattleCell _ = error"Parsing error for battle grid"

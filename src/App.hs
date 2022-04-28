@@ -94,11 +94,14 @@ applyEvent ev (Model n steps grid) = case ev of
         (One, QR _)   -> QR pattern1100
         (Two, QR _)   -> QR pattern1130
         (Three, QR _) -> QR spiral
+        (One, Battle _) -> Battle simpleBattle
+        (Two, Battle _) -> Battle bigBattle
+        (_, Battle _) -> Battle simpleBattle
   Step -> Model (n + 1) steps grid'
     where
       grid' = case grid of
         QR g -> QR (nextGenQR g)
-        Battle g -> Battle (moveSoliders g)
+        Battle g -> Battle (nextGenBattle g)
   Jump -> Model (n + steps) steps grid'
     where
       grid' = case grid of
