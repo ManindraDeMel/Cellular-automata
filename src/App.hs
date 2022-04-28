@@ -4,7 +4,6 @@ module App where
 import Extension
 import Automata
 import CodeWorld
-import Data.List (splitAt)
 import Data.Text (pack)
 import GridRenderer
 import TestPatterns
@@ -34,8 +33,6 @@ data AppEvent
     -- ^ Replace the grid with one of the test patterns.
   | ToQR
     -- ^ Switch to QR World.
-  | ToBattle
-    -- ^ Switch to Battle World
   | Step
     -- ^ Run the automaton one step.
   | Jump
@@ -43,6 +40,9 @@ data AppEvent
   | IncreaseJumpSize
 
   | DecreaseJumpSize
+  
+  | ToBattle
+    -- ^ Switch to Battle World
 
 data TestPattern = One | Two | Three
 
@@ -87,6 +87,7 @@ applyEvent ev (Model n steps grid) = case ev of
     where
       grid' = case grid of
         QR cells -> QR (at p cycleQR cells)
+        Battle cells -> Battle (at p cycleBattle cells)
   LoadTestPattern pat -> initial grid'
     where
       grid' = case (pat, grid) of
@@ -97,10 +98,12 @@ applyEvent ev (Model n steps grid) = case ev of
     where
       grid' = case grid of
         QR g -> QR (nextGenQR g)
+        Battle g -> Battle (moveSoliders g)
   Jump -> Model (n + steps) steps grid'
     where
       grid' = case grid of
         QR g -> QR (evolveQR steps g)
+        Battle g -> Battle (evolveBattle steps g)
   IncreaseJumpSize -> Model n (steps + 1) grid
   DecreaseJumpSize -> Model n (max 1 (steps - 1)) grid
 
@@ -115,13 +118,3 @@ render (Model n steps grid)
 -- | Apply a function to a certain cell inside a grid, and return a
 -- new grid where that cell has been replaced with the result of the
 -- function call.
-at :: GridCoord -> (c -> c) -> Grid c -> Grid c
-at p@(x, y) f g@(Grid w h cells) = case get g p of
-  Nothing -> g
-  Just c -> Grid w h cells' where
-    cells' = beforeCells ++ f c:afterCells
-    (beforeCells, _:afterCells) = splitAt (w * y + x) cells
-
--- | Replace a cell within a grid.
-setAt :: GridCoord -> c -> Grid c -> Grid c
-setAt p c = at p (const c)

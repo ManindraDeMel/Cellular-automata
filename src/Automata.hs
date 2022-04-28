@@ -16,8 +16,6 @@ type GridCoord = (Int, Int)
 data QRCell = Alive | Dead
     deriving (Eq, Show)
 
-
-
 cycleQR :: QRCell -> QRCell
 cycleQR Alive = Dead
 cycleQR Dead = Alive
@@ -65,11 +63,5 @@ nextGenQR (Grid a b c) = Grid a b newC                                          
 evolveQR :: Int -> Grid QRCell -> Grid QRCell
 evolveQR n g = iterate nextGenQR g !! n
 
-get :: Grid c -> GridCoord -> Maybe c
-get (Grid a b c) (x, y)
-    | x <= a && y <= b = Just $ c !! (y * a + x)
-    | otherwise = Nothing
-
 allCoords :: Int -> Int -> [GridCoord]
 allCoords a b = [(x, y) | y <- [0..b-1], x <- [0..a-1]]
-

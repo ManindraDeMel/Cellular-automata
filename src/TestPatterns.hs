@@ -74,6 +74,6 @@ toQR _ = error"Not valid QR"
 toBattleCell :: Char -> BattleCell
 toBattleCell ' ' = Ground
 toBattleCell 'B' = Bush
-toBattleCell '1' = Team1 8 False
-toBattleCell '2' = Team2 8 False
+toBattleCell '1' = Team1 False
+toBattleCell '2' = Team2 False
 toBattleCell _ = error"Parsing error for battle grid"
