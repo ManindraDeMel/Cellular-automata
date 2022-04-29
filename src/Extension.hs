@@ -2,7 +2,7 @@ module Extension where
 
 import CodeWorld
 
-import Automata ( allCoords, getForNextGen, Grid(..), GridCoord, getNeighboursCoords)
+import Automata ( allCoords, getForNextGen, Grid(..), GridCoord)
 
 type InCover = Bool
 
@@ -36,6 +36,22 @@ renderBattleCell cell = case cell of
     Team2-> coloured blue $ solidRectangle 1 1
     Ground  -> coloured (light green) $ solidRectangle 1 1
 
+getNeighboursCoords :: Grid c -> GridCoord -> [GridCoord]
+getNeighboursCoords (Grid a b _) (x, y)
+    | x < xBound && x > 0 &&  y < yBound && y > 0 = [(x - 1, y), (x + 1, y), (x, y - 1),  (x, y + 1), (x + 1, y + 1), (x - 1, y + 1), (x + 1, y - 1), (x - 1, y - 1)] -- general case when x or y aren't on the bounds
+    | x == xBound && y < yBound && y > 0 = [(x - 1, y), (x, y - 1), (x, y + 1), (x - 1, y - 1), (x - 1, y + 1)] -- at the right x bound (But not corners)
+    | x == 0 &&  y < yBound && y > 0 = [(x + 1, y), (x, y - 1), (x, y + 1), (x + 1, y - 1), (x + 1, y + 1)] -- at the left x bound
+    | x < xBound && x > 0 &&  y == yBound = [(x - 1, y), (x + 1, y), (x, y - 1), (x + 1, y - 1), (x - 1, y - 1)] -- at the bottom y bound
+    | x < xBound && x > 0 && y == 0 = [(x - 1, y), (x + 1, y), (x, y + 1), (x + 1, y + 1), (x - 1, y + 1)] -- at the top y bound
+    | x == 0 && y == 0 = [(x + 1, y), (x, y + 1), (x + 1, y + 1)] -- top left
+    | x == xBound && y == 0 = [(x - 1, y), (x, y + 1), (x - 1, y + 1)] -- top right
+    | x == 0 && y == yBound = [(x + 1, y), (x, y - 1), (x + 1, y - 1)] -- bottom left
+    | x == xBound && y == yBound = [(x - 1, y), (x, y - 1), (x - 1, y - 1)]-- bottom right
+    | otherwise = error "Out of bounds"
+        where
+            xBound = a - 1
+            yBound = b - 1
+
 getCoords :: Grid BattleCell -> BattleCell -> [GridCoord]
 getCoords (Grid a b c) object = map snd $ filter (\x -> fst x ==  object) $ zip c $ allCoords a b
 
@@ -58,14 +74,17 @@ moveSoliders (Grid a b c) = nextMovementPhase (Grid a b c) $ allCoords a b
 nextMovementPhase :: Grid BattleCell -> [GridCoord] -> Grid BattleCell
 nextMovementPhase g [] = g
 nextMovementPhase (Grid a b c) (y:ys) = case cell of
-    Team1 | validMovement g nextPoint1 -> nextMovementPhase (setAt y Ground (setAt nextPoint1 Team1 g)) ys
-    Team2 | validMovement g nextPoint2 -> nextMovementPhase (setAt y Ground (setAt nextPoint2 Team2 g)) ys
+    Team1 | validMovement g nextPoint1 -> nextMovementPhase (setAt y Ground (setAt nextPoint1 Team1 g)) $ removeModifiedPoint nextPoint1 ys
+    Team2 | validMovement g nextPoint2 -> nextMovementPhase (setAt y Ground (setAt nextPoint2 Team2 g)) $ removeModifiedPoint nextPoint2 ys
     _ -> nextMovementPhase (setAt y cell g) ys
     where
         cell = getForNextGen g y
         g = Grid a b c
         nextPoint1 = getNextPoint y (getClosestSpecificObject g Team2 y)
         nextPoint2 = getNextPoint y (getClosestSpecificObject g Team1 y)
+
+        removeModifiedPoint :: Eq a => a -> [a] -> [a]
+        removeModifiedPoint q xs = [x | x <- xs, x /= q]
 
 validMovement :: Grid BattleCell -> GridCoord -> Bool
 validMovement g a = case battleType of
@@ -76,7 +95,7 @@ validMovement g a = case battleType of
         battleType = getForNextGen g a
 
 getNextPoint :: GridCoord -> Maybe GridCoord -> GridCoord
-getNextPoint _ Nothing = (0,0) -- When there are no enemies
+getNextPoint a Nothing = a -- When there are no enemies
 getNextPoint (x, y) (Just (x2, y2)) = case (x3, y3) of
     (0, 0) -> (0, 0) -- should never match
     (0, a) -> (x, y + (a `div` abs a)) -- moving vertically
@@ -112,21 +131,17 @@ getClosestSpecificObject g p c = (safeSnd . safeHead . safeMin) $ zip (map (dist
 
 nextState :: (BattleCell, [BattleCell]) -> BattleCell
 nextState (Team1, li)
-    | allies == 0 || enemies == 0 = Team1
-    | allies == enemies = Team1
-    | allies < enemies = Ground
-    | allies > enemies = Team1
+    | enemies > 1 && allies <= enemies = Ground
+    | otherwise = Team1
     where
-        allies = length $ filter (== Team1) li
         enemies = length $ filter (== Team2) li
+        allies = length $ filter (== Team1) li
 
 nextState (Team2, li)
-    | allies2 == 0 || enemies2 == 0 = Team2
-    | allies2 == enemies2 = Team2
-    | allies2 < enemies2 = Ground
-    | allies2 > enemies2 = Team2
+    | enemies2 > 0 && allies2 <= enemies2 = Ground
+    | otherwise = Team2
     where
-        allies2 = length $ filter (== Team2) li
         enemies2 = length $ filter (== Team1) li
+        allies2 = length $ filter (== Team2) li
 
 nextState(cell, _) = cell -- Ground
