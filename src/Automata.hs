@@ -38,7 +38,7 @@ nextState (Dead, neighbourStates)
     | length (filter (== Alive) neighbourStates) == 2 || length (filter (== Alive) neighbourStates) == 4 = Alive -- Alive due to breeding
     | otherwise = Dead
 
-getNeighboursCoords :: Grid c -> GridCoord -> [GridCoord]
+getNeighboursCoords :: Grid c -> GridCoord -> [GridCoord] -- gets all neighbours except the diagonal ones
 getNeighboursCoords (Grid a b _) (x, y)
     | x < xBound && x > 0 &&  y < yBound && y > 0 = [(x - 1, y), (x + 1, y), (x, y - 1),  (x, y + 1)] -- general case when x or y aren't on the bounds
     | x == xBound && y < yBound && y > 0 = [(x - 1, y), (x, y - 1), (x, y + 1)] -- at the right x bound (But not corners)

@@ -6,6 +6,7 @@ import Automata ( allCoords, getForNextGen, Grid(..), GridCoord)
 
 type InCover = Bool
 
+-- From App.hs
 get :: Grid c -> GridCoord -> Maybe c
 get (Grid a b c) (x, y)
     | x <= a && y <= b && x >= 0 && y >= 0 = Just $ c !! (y * a + x)
@@ -21,7 +22,9 @@ at p@(x, y) f g@(Grid w h cells) = case get g p of
 setAt :: GridCoord -> c -> Grid c -> Grid c
 setAt p c = at p (const c)
 
-data BattleCell = Team1 | Team2 | Ground -- I like having new datatype in one line, looks cleaner
+-- Battle world starts here
+
+data BattleCell = Team1 | Team2 | Ground -- I prefer having a new  (short) datatype defined in one line, looks cleaner
     deriving (Eq, Show)
 
 cycleBattle :: BattleCell -> BattleCell
@@ -36,7 +39,7 @@ renderBattleCell cell = case cell of
     Team2-> coloured blue $ solidRectangle 1 1
     Ground  -> coloured (light green) $ solidRectangle 1 1
 
-getNeighboursCoords :: Grid c -> GridCoord -> [GridCoord]
+getNeighboursCoords :: Grid c -> GridCoord -> [GridCoord] -- gets all neighbours, including diagonals
 getNeighboursCoords (Grid a b _) (x, y)
     | x < xBound && x > 0 &&  y < yBound && y > 0 = [(x - 1, y), (x + 1, y), (x, y - 1),  (x, y + 1), (x + 1, y + 1), (x - 1, y + 1), (x + 1, y - 1), (x - 1, y - 1)] -- general case when x or y aren't on the bounds
     | x == xBound && y < yBound && y > 0 = [(x - 1, y), (x, y - 1), (x, y + 1), (x - 1, y - 1), (x - 1, y + 1)] -- at the right x bound (But not corners)
@@ -52,26 +55,24 @@ getNeighboursCoords (Grid a b _) (x, y)
             xBound = a - 1
             yBound = b - 1
 
-getCoords :: Grid BattleCell -> BattleCell -> [GridCoord]
+getCoords :: Grid BattleCell -> BattleCell -> [GridCoord] -- get the GridCoords of all a specific BattleCell type in a Grid
 getCoords (Grid a b c) object = map snd $ filter (\x -> fst x ==  object) $ zip c $ allCoords a b
 
 nextGenBattle :: Grid BattleCell -> Grid BattleCell
 nextGenBattle (Grid a b c) = Grid a b $ zipWith (curry nextState) (getList (moveSoliders (Grid a b c))) neighbourList
     where
         neighbourList = [map (getForNextGen (Grid a b c)) points | points <- map (getNeighboursCoords (Grid a b c)) (allCoords a b)]
-
-getList :: Grid BattleCell -> [BattleCell]
-getList (Grid _ _ c) = c
+        getList :: Grid BattleCell -> [BattleCell]
+        getList (Grid _ _ q) = q
 
 evolveBattle :: Int -> Grid BattleCell -> Grid BattleCell
 evolveBattle n g = iterate nextGenBattle g !! n
-
 
 -- Move phase of the battle
 moveSoliders :: Grid BattleCell -> Grid BattleCell
 moveSoliders (Grid a b c) = nextMovementPhase (Grid a b c) $ allCoords a b
 
-nextMovementPhase :: Grid BattleCell -> [GridCoord] -> Grid BattleCell
+nextMovementPhase :: Grid BattleCell -> [GridCoord] -> Grid BattleCell -- Moves all the soldiers respectively in a recursive manner. 
 nextMovementPhase g [] = g
 nextMovementPhase (Grid a b c) (y:ys) = case cell of
     Team1 | validMovement g nextPoint1 -> nextMovementPhase (setAt y Ground (setAt nextPoint1 Team1 g)) $ removeModifiedPoint nextPoint1 ys
@@ -86,7 +87,7 @@ nextMovementPhase (Grid a b c) (y:ys) = case cell of
         removeModifiedPoint :: Eq a => a -> [a] -> [a]
         removeModifiedPoint q xs = [x | x <- xs, x /= q]
 
-validMovement :: Grid BattleCell -> GridCoord -> Bool
+validMovement :: Grid BattleCell -> GridCoord -> Bool -- so soldiers dont delete allies by moving onto them
 validMovement g a = case battleType of
     Ground -> True
     Team1 -> False
@@ -95,7 +96,7 @@ validMovement g a = case battleType of
         battleType = getForNextGen g a
 
 getNextPoint :: GridCoord -> Maybe GridCoord -> GridCoord
-getNextPoint a Nothing = a -- When there are no enemies
+getNextPoint a Nothing = a -- When there are no enemies, don't move
 getNextPoint (x, y) (Just (x2, y2)) = case (x3, y3) of
     (0, 0) -> (0, 0) -- should never match
     (0, a) -> (x, y + (a `div` abs a)) -- moving vertically
