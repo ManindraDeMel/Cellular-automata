@@ -59,7 +59,7 @@ getCoords :: Grid BattleCell -> BattleCell -> [GridCoord] -- get the GridCoords 
 getCoords (Grid a b c) object = map snd $ filter (\x -> fst x ==  object) $ zip c $ allCoords a b
 
 nextGenBattle :: Grid BattleCell -> Grid BattleCell
-nextGenBattle (Grid a b c) = Grid a b $ zipWith (curry nextState) (getList (moveSoliders (Grid a b c))) neighbourList
+nextGenBattle (Grid a b c) = Grid a b $ zipWith (curry nextState) (getList (moveSoldiers (Grid a b c))) neighbourList
     where
         neighbourList = [map (getForNextGen (Grid a b c)) points | points <- map (getNeighboursCoords (Grid a b c)) (allCoords a b)]
         getList :: Grid BattleCell -> [BattleCell]
@@ -69,8 +69,8 @@ evolveBattle :: Int -> Grid BattleCell -> Grid BattleCell
 evolveBattle n g = iterate nextGenBattle g !! n
 
 -- Move phase of the battle
-moveSoliders :: Grid BattleCell -> Grid BattleCell
-moveSoliders (Grid a b c) = nextMovementPhase (Grid a b c) $ allCoords a b
+moveSoldiers :: Grid BattleCell -> Grid BattleCell
+moveSoldiers (Grid a b c) = nextMovementPhase (Grid a b c) $ allCoords a b
 
 nextMovementPhase :: Grid BattleCell -> [GridCoord] -> Grid BattleCell -- Moves all the soldiers respectively in a recursive manner. 
 nextMovementPhase g [] = g
