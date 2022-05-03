@@ -132,7 +132,7 @@ getClosestSpecificObject g p c = (safeSnd . safeHead . safeMin) $ zip (map (dist
 
 nextState :: (BattleCell, [BattleCell]) -> BattleCell
 nextState (Team1, li)
-    | enemies > 1 && allies <= enemies = Ground
+    | enemies > 0 && allies <= enemies = Ground
     | otherwise = Team1
     where
         enemies = length $ filter (== Team2) li
